@@ -1,0 +1,113 @@
+# Interpreter for Meulvar
+
+# Interpreter function
+func interpret(ast: Node) {
+    let environment = {}
+
+    func evaluate(node: Node, env: Any) -> Any {
+        if node.type == PROGRAM {
+            for child in node.children {
+                evaluate(child, env)
+            }
+        } else if node.type == FUNCTION_DECLARATION {
+            let name = node.value
+            let params = node.children[0]
+            let body = node.children[1]
+            env[name] = {
+                params: params,
+                body: body
+            }
+        } else if node.type == VARIABLE_DECLARATION {
+            let name = node.value
+            let value = evaluate(node.children[0], env)
+            env[name] = value
+        } else if node.type == EXPRESSION_STATEMENT {
+            evaluate(node.children[0], env)
+        } else if node.type == BLOCK_STATEMENT {
+            let newEnv = {}
+            for child in node.children {
+                evaluate(child, newEnv)
+            }
+        } else if node.type == IF_STATEMENT {
+            let condition = evaluate(node.children[0], env)
+            if condition {
+                evaluate(node.children[1], env)
+            } else if node.children[2] != null {
+                evaluate(node.children[2], env)
+            }
+        } else if node.type == WHILE_STATEMENT {
+            let condition = evaluate(node.children[0], env)
+            while condition {
+                evaluate(node.children[1], env)
+                condition = evaluate(node.children[0], env)
+            }
+        } else if node.type == FOR_STATEMENT {
+            evaluate(node.children[0], env)
+            let condition = evaluate(node.children[1], env)
+            while condition {
+                evaluate(node.children[3], env)
+                evaluate(node.children[2], env)
+                condition = evaluate(node.children[1], env)
+            }
+        } else if node.type == RETURN_STATEMENT {
+            return evaluate(node.children[0], env)
+        } else if node.type == BINARY_EXPRESSION {
+            let left = evaluate(node.children[0], env)
+            let right = evaluate(node.children[1], env)
+            let operator = node.value
+            if operator == "+" {
+                return left + right
+            } else if operator == "-" {
+                return left - right
+            } else if operator == "*" {
+                return left * right
+            } else if operator == "/" {
+                return left / right
+            } else if operator == "%" {
+                return left % right
+            } else if operator == "==" {
+                return left == right
+            } else if operator == "!=" {
+                return left != right
+            } else if operator == "<" {
+                return left < right
+            } else if operator == ">" {
+                return left > right
+            } else if operator == "<=" {
+                return left <= right
+            } else if operator == ">=" {
+                return left >= right
+            } else if operator == "&&" {
+                return left && right
+            } else if operator == "||" {
+                return left || right
+            } else if operator == "&" {
+                return left & right
+            } else if operator == "|" {
+                return left | right
+            } else if operator == "^" {
+                return left ^ right
+            } else if operator == "<<" {
+                return left << right
+            } else if operator == ">>" {
+                return left >> right
+            }
+        } else if node.type == UNARY_EXPRESSION {
+            let operand = evaluate(node.children[0], env)
+            let operator = node.value
+            if operator == "!" {
+                return !operand
+            } else if operator == "~" {
+                return ~operand
+            } else if operator == "-" {
+                return -operand
+            }
+        } else if node.type == LITERAL {
+            return node.value
+        } else if node.type == IDENTIFIER {
+            return env[node.value]
+        }
+    }
+
+    evaluate(ast, environment)
+}

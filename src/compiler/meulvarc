@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+function compileMeulvar() {
+  local filePath="$1"
+  local code
+  code=$(cat "$filePath")
+  # Actual compilation logic
+  echo "Compiling $filePath..."
+  tokens=$(./Meulvar/src/compiler/lexer "$code")
+  ast=$(./Meulvar/src/compiler/parser "$tokens")
+  ./Meulvar/src/compiler/interpreter "$ast"
+  echo "Compiled code output goes here."
+}
+
+function main() {
+  if [ "$#" -lt 1 ]; then
+    echo "Usage: mvr <input_file.mvr> [-o <output_file>]"
+    exit 1
+  fi
+
+  local inputFile="$1"
+  local outputFile
+  if [ "$2" == "-o" ]; then
+    outputFile="$3"
+  else
+    outputFile="${inputFile%.mvr}"
+  fi
+
+  compileMeulvar "$inputFile"
+  echo "Output written to $outputFile"
+}
+
+main "$@"

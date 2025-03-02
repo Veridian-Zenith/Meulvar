@@ -1,0 +1,85 @@
+# Standard Library for Meulvar
+
+# Basic I/O functions
+func print(value: Any) {
+    // Print the value to the console
+}
+
+func input() -> String {
+    // Read a line of input from the console
+    return ""
+}
+
+# String functions
+func length(str: String) -> Int {
+    // Return the length of the string
+    return 0
+}
+
+func substring(str: String, start: Int, end: Int) -> String {
+    // Return a substring from start to end
+    return ""
+}
+
+func concat(str1: String, str2: String) -> String {
+    // Concatenate two strings
+    return ""
+}
+
+# Math functions
+func abs(value: Int) -> Int {
+    // Return the absolute value
+    return 0
+}
+
+func pow(base: Int, exponent: Int) -> Int {
+    // Return base raised to the power of exponent
+    return 0
+}
+
+func sqrt(value: Int) -> Int {
+    // Return the square root of the value
+    return 0
+}
+
+# Array functions
+func append(array: [Any], value: Any) -> [Any] {
+    // Append a value to the array
+    return []
+}
+
+func remove(array: [Any], index: Int) -> [Any] {
+    // Remove the value at the given index
+    return []
+}
+
+func length(array: [Any]) -> Int {
+    // Return the length of the array
+    return 0
+}
+
+# Dictionary functions
+func set(dict: [String: Any], key: String, value: Any) -> [String: Any] {
+    // Set a key-value pair in the dictionary
+    return {}
+}
+
+func get(dict: [String: Any], key: String) -> Any {
+    // Get the value associated with the key
+    return null
+}
+
+func remove(dict: [String: Any], key: String) -> [String: Any] {
+    // Remove the key-value pair from the dictionary
+    return {}
+}
+
+func keys(dict: [String: Any]) -> [String] {
+    // Return an array of keys in the dictionary
+    return []
+}
+
+func values(dict: [String: Any]) -> [Any] {
+    // Return an array of values in the dictionary
+    return []
+}

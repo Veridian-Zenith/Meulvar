@@ -1,0 +1,216 @@
+# Parser for Meulvar
+
+# AST Node types
+enum NodeType {
+    PROGRAM,
+    FUNCTION_DECLARATION,
+    VARIABLE_DECLARATION,
+    EXPRESSION_STATEMENT,
+    BLOCK_STATEMENT,
+    IF_STATEMENT,
+    WHILE_STATEMENT,
+    FOR_STATEMENT,
+    RETURN_STATEMENT,
+    BINARY_EXPRESSION,
+    UNARY_EXPRESSION,
+    LITERAL,
+    IDENTIFIER
+}
+
+# AST Node structure
+struct Node {
+    type: NodeType,
+    value: Any,
+    children: [Node]
+}
+
+# Parser function
+func parse(tokens: [Token]) -> Node {
+    let ast = Node(type: PROGRAM, value: null, children: [])
+    let i = 0
+
+    while i < tokens.length() {
+        let token = tokens[i]
+
+        if token.type == IDENTIFIER {
+            let identifier = token.value
+            i += 1
+            if tokens[i].type == LEFT_PAREN {
+                // Function declaration
+                i += 1
+                let params = []
+                while tokens[i].type != RIGHT_PAREN {
+                    params.append(tokens[i].value)
+                    i += 1
+                }
+                i += 1 // Skip RIGHT_PAREN
+                let body = parseBlock(tokens, i)
+                ast.children.append(Node(type: FUNCTION_DECLARATION, value: identifier, children: [params, body]))
+            } else {
+                // Variable declaration
+                i += 1 // Skip ASSIGN
+                let value = parseExpression(tokens, i)
+                ast.children.append(Node(type: VARIABLE_DECLARATION, value: identifier, children: [value]))
+            }
+        } else if token.type == KEYWORD {
+            if token.value == "if" {
+                // If statement
+                i += 1 // Skip LEFT_PAREN
+                let condition = parseExpression(tokens, i)
+                i += 1 // Skip RIGHT_PAREN
+                let thenBranch = parseBlock(tokens, i)
+                let elseBranch = null
+                if tokens[i].value == "else" {
+                    i += 1
+                    elseBranch = parseBlock(tokens, i)
+                }
+                ast.children.append(Node(type: IF_STATEMENT, value: null, children: [condition, thenBranch, elseBranch]))
+            } else if token.value == "while" {
+                // While statement
+                i += 1 // Skip LEFT_PAREN
+                let condition = parseExpression(tokens, i)
+                i += 1 // Skip RIGHT_PAREN
+                let body = parseBlock(tokens, i)
+                ast.children.append(Node(type: WHILE_STATEMENT, value: null, children: [condition, body]))
+            } else if token.value == "for" {
+                // For statement
+                i += 1 // Skip LEFT_PAREN
+                let initializer = parseExpression(tokens, i)
+                i += 1 // Skip SEMICOLON
+                let condition = parseExpression(tokens, i)
+                i += 1 // Skip SEMICOLON
+                let increment = parseExpression(tokens, i)
+                i += 1 // Skip RIGHT_PAREN
+                let body = parseBlock(tokens, i)
+                ast.children.append(Node(type: FOR_STATEMENT, value: null, children: [initializer, condition, increment, body]))
+            } else if token.value == "return" {
+                // Return statement
+                let value = parseExpression(tokens, i)
+                ast.children.append(Node(type: RETURN_STATEMENT, value: null, children: [value]))
+            }
+        } else {
+            // Expression statement
+            let expression = parseExpression(tokens, i)
+            ast.children.append(Node(type: EXPRESSION_STATEMENT, value: null, children: [expression]))
+        }
+    }
+
+    return ast
+}
+
+# Helper function to parse a block
+func parseBlock(tokens: [Token], start: Int) -> Node {
+    let block = Node(type: BLOCK_STATEMENT, value: null, children: [])
+    let i = start
+
+    while tokens[i].type != RIGHT_BRACE {
+        let statement = parseStatement(tokens, i)
+        block.children.append(statement)
+        i += 1
+    }
+
+    return block
+}
+
+# Helper function to parse a statement
+func parseStatement(tokens: [Token], start: Int) -> Node {
+    let i = start
+    let token = tokens[i]
+
+    if token.type == IDENTIFIER {
+        let identifier = token.value
+        i += 1
+        if tokens[i].type == LEFT_PAREN {
+            // Function call
+            i += 1
+            let args = []
+            while tokens[i].type != RIGHT_PAREN {
+                args.append(parseExpression(tokens, i))
+                i += 1
+            }
+            i += 1 // Skip RIGHT_PAREN
+            return Node(type: EXPRESSION_STATEMENT, value: null, children: [Node(type: IDENTIFIER, value: identifier, children: args)])
+        } else {
+            // Variable assignment
+            i += 1 // Skip ASSIGN
+            let value = parseExpression(tokens, i)
+            return Node(type: EXPRESSION_STATEMENT, value: null, children: [Node(type: IDENTIFIER, value: identifier, children: [value])])
+        }
+    } else if token.type == KEYWORD {
+        if token.value == "if" {
+            // If statement
+            i += 1 // Skip LEFT_PAREN
+            let condition = parseExpression(tokens, i)
+            i += 1 // Skip RIGHT_PAREN
+            let thenBranch = parseBlock(tokens, i)
+            let elseBranch = null
+            if tokens[i].value == "else" {
+                i += 1
+                elseBranch = parseBlock(tokens, i)
+            }
+            return Node(type: IF_STATEMENT, value: null, children: [condition, thenBranch, elseBranch])
+        } else if token.value == "while" {
+            // While statement
+            i += 1 // Skip LEFT_PAREN
+            let condition = parseExpression(tokens, i)
+            i += 1 // Skip RIGHT_PAREN
+            let body = parseBlock(tokens, i)
+            return Node(type: WHILE_STATEMENT, value: null, children: [condition, body])
+        } else if token.value == "for" {
+            // For statement
+            i += 1 // Skip LEFT_PAREN
+            let initializer = parseExpression(tokens, i)
+            i += 1 // Skip SEMICOLON
+            let condition = parseExpression(tokens, i)
+            i += 1 // Skip SEMICOLON
+            let increment = parseExpression(tokens, i)
+            i += 1 // Skip RIGHT_PAREN
+            let body = parseBlock(tokens, i)
+            return Node(type: FOR_STATEMENT, value: null, children: [initializer, condition, increment, body])
+        } else if token.value == "return" {
+            // Return statement
+            let value = parseExpression(tokens, i)
+            return Node(type: RETURN_STATEMENT, value: null, children: [value])
+        }
+    } else {
+        // Expression statement
+        let expression = parseExpression(tokens, i)
+        return Node(type: EXPRESSION_STATEMENT, value: null, children: [expression])
+    }
+}
+
+# Helper function to parse an expression
+func parseExpression(tokens: [Token], start: Int) -> Node {
+    let i = start
+    let token = tokens[i]
+
+    if token.type == INT || token.type == FLOAT || token.type == STRING || token.type == CHAR {
+        // Literal
+        return Node(type: LITERAL, value: token.value, children: [])
+    } else if token.type == IDENTIFIER {
+        // Identifier
+        return Node(type: IDENTIFIER, value: token.value, children: [])
+    } else if token.type == LEFT_PAREN {
+        // Parenthesized expression
+        i += 1
+        let expression = parseExpression(tokens, i)
+        i += 1 // Skip RIGHT_PAREN
+        return expression
+    } else if token.type == PLUS || token.type == MINUS || token.type == MULTIPLY || token.type == DIVIDE || token.type == MODULO {
+        // Binary expression
+        let left = parseExpression(tokens, i)
+        let operator = token.value
+        i += 1
+        let right = parseExpression(tokens, i)
+        return Node(type: BINARY_EXPRESSION, value: operator, children: [left, right])
+    } else if token.type == NOT || token.type == BITWISE_NOT {
+        // Unary expression
+        let operator = token.value
+        i += 1
+        let operand = parseExpression(tokens, i)
+        return Node(type: UNARY_EXPRESSION, value: operator, children: [operand])
+    } else {
+        // Unknown token
+        panic("Unknown token: " + token.value)
+    }
+}

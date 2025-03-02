@@ -1,0 +1,51 @@
+# Runtime Environment for Meulvar
+
+# Memory management functions
+func alloc(size: Int) -> *Any {
+    // Allocate memory of the given size
+    return null
+}
+
+func free(ptr: *Any) {
+    // Free the memory at the given pointer
+}
+
+# Concurrency functions
+func spawn(func: () -> Void) {
+    // Spawn a new thread to execute the function
+}
+
+func join(thread: Thread) {
+    // Wait for the thread to finish execution
+}
+
+# Error handling functions
+func panic(message: String) {
+    // Print the message and terminate the program
+}
+
+# Utility functions
+func typeOf(value: Any) -> String {
+    // Return the type of the value as a string
+    return ""
+}
+
+func toString(value: Any) -> String {
+    // Convert the value to a string
+    return ""
+}
+
+func toInt(value: String) -> Int {
+    // Convert the string to an integer
+    return 0
+}
+
+func toFloat(value: String) -> Float {
+    // Convert the string to a float
+    return 0.0
+}
+
+func toBool(value: String) -> Bool {
+    // Convert the string to a boolean
+    return false
+}
